@@ -130,16 +130,18 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 def main():
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    # создаём приложение
+    app = (
+        ApplicationBuilder()
+        .token(BOT_TOKEN)
+        .build()
+    )
 
+    # регистрируем обработчики команд
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("add", add))
-    app.add_handler(CommandHandler("save", save_plant))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, save_plant))
     app.add_handler(CallbackQueryHandler(button))
 
-    scheduler.start()
+    # запускаем бот
     app.run_polling()
-
-
-if __name__ == "__main__":
-    main()
