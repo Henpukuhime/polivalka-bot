@@ -1,62 +1,54 @@
 import os
 import logging
-from telegram import Update, ReplyKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
+    Application,
     ApplicationBuilder,
     CommandHandler,
     ContextTypes,
 )
 
-# ---------- НАСТРОЙКИ ----------
+# ---------- ЛОГИ ----------
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.INFO,
+)
+logger = logging.getLogger(__name__)
 
+# ---------- TOKEN ----------
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 if not BOT_TOKEN:
     raise RuntimeError("BOT_TOKEN is not set in environment variables")
 
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.INFO,
-)
-
-# ---------- КНОПКИ ----------
-
-MAIN_KEYBOARD = ReplyKeyboardMarkup(
-    [
-        ["Пора полить 🌿"],
-        ["Не сегодня", "Отложить"],
-    ],
-    resize_keyboard=True,
-)
-
-# ---------- ХЭНДЛЕРЫ ----------
-
+# ---------- HANDLERS ----------
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        [InlineKeyboardButton("🌱 Добавить растение", callback_data="add_plant")],
+        [InlineKeyboardButton("💧 Полить сегодня", callback_data="water_now")],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
     await update.message.reply_text(
-        "Привет! Я Поливалка 🌱\n\n"
-        "Я буду помогать тебе помнить о поливе растений.\n"
-        "Без давления. Без занудства.\n\n"
-        "Начнём?",
-        reply_markup=MAIN_KEYBOARD,
+        "Привет 🌿\n\n"
+        "Я Поливалка — помогу не забыть полить твои растения.\n"
+        "Выбирай, что делаем:",
+        reply_markup=reply_markup,
     )
 
 
-async def unknown(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "Я пока этого не умею, но я стараюсь 🌿"
-    )
-
-# ---------- ЗАПУСК ----------
-
+# ---------- MAIN ----------
 def main():
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    app: Application = (
+        ApplicationBuilder()
+        .token(BOT_TOKEN)
+        .build()
+    )
 
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("help", start))
 
-    app.add_handler(CommandHandler(None, unknown))
+    logger.info("🌱 Polivalka started")
 
-    print("🌱 Polivalka started")
     app.run_polling()
 
 
