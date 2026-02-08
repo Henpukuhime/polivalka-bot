@@ -30,11 +30,21 @@ async def ping(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Я жива 🌱")
 
 
+async def add(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "Что ты хочешь добавить?\n\n"
+        "🌱 Одно растение\n"
+        "🌿 Группу растений\n\n"
+        "Пока просто ответь текстом: растение или группа"
+    )
+
+
 def main():
     app = Application.builder().token(BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("ping", ping))
+    app.add_handler(CommandHandler("add", add))
 
     print("🌱 Polivalka started")
 
