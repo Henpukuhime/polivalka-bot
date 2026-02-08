@@ -2,10 +2,15 @@
 import os
 import logging
 
-from telegram import Update
+from telegram import (
+    Update,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+)
 from telegram.ext import (
     Application,
     CommandHandler,
+    CallbackQueryHandler,
     ContextTypes,
 )
 
@@ -31,12 +36,41 @@ async def ping(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def add(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        [
+            InlineKeyboardButton("🌱 Растение", callback_data="add_plant"),
+            InlineKeyboardButton("🌿 Группа растений", callback_data="add_group"),
+        ]
+    ]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
     await update.message.reply_text(
-        "Что ты хочешь добавить?\n\n"
-        "🌱 Одно растение\n"
-        "🌿 Группу растений\n\n"
-        "Пока просто ответь текстом: растение или группа"
+        "Что ты хочешь добавить?",
+        reply_markup=reply_markup,
     )
+
+
+async def add_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    if query.data == "add_plant":
+        text = (
+            "🌱 Хорошо.\n\n"
+            "Напиши, что это за растение.\n"
+            "Если у него есть имя — тоже напиши."
+        )
+    elif query.data == "add_group":
+        text = (
+            "🌿 Хорошо.\n\n"
+            "Напиши, что это за группа растений.\n"
+            "Можно указать общее имя группы."
+        )
+    else:
+        return
+
+    await query.message.reply_text(text)
 
 
 def main():
@@ -46,9 +80,10 @@ def main():
     app.add_handler(CommandHandler("ping", ping))
     app.add_handler(CommandHandler("add", add))
 
+    app.add_handler(CallbackQueryHandler(add_choice))
+
     print("🌱 Polivalka started")
 
-    # ВАЖНО: без await, без asyncio.run
     app.run_polling()
 
 
