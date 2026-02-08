@@ -1,49 +1,45 @@
 import os
 import logging
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update
 from telegram.ext import (
     Application,
-    ApplicationBuilder,
     CommandHandler,
     ContextTypes,
 )
 
-# ---------- ЛОГИ ----------
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.INFO,
-)
-logger = logging.getLogger(__name__)
+# =========================
+# НАСТРОЙКИ
+# =========================
 
-# ---------- TOKEN ----------
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 if not BOT_TOKEN:
-    raise RuntimeError("BOT_TOKEN is not set in environment variables")
+    raise RuntimeError("BOT_TOKEN is not set")
 
-# ---------- HANDLERS ----------
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+
+logger = logging.getLogger(__name__)
+
+# =========================
+# ХЕНДЛЕРЫ
+# =========================
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [
-        [InlineKeyboardButton("🌱 Добавить растение", callback_data="add_plant")],
-        [InlineKeyboardButton("💧 Полить сегодня", callback_data="water_now")],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
     await update.message.reply_text(
-        "Привет 🌿\n\n"
-        "Я Поливалка — помогу не забыть полить твои растения.\n"
-        "Выбирай, что делаем:",
-        reply_markup=reply_markup,
+        "Я Поливалка 🌱\n"
+        "Буду напоминать тебе про полив растений.\n\n"
+        "Пока я только проснулась, но скоро научусь большему."
     )
 
+# =========================
+# ЗАПУСК
+# =========================
 
-# ---------- MAIN ----------
 def main():
-    app: Application = (
-        ApplicationBuilder()
-        .token(BOT_TOKEN)
-        .build()
-    )
+    app = Application.builder().token(BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
 
